@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Frontier Regional Hospital - ID Card Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            width: 400px;
+        }
+        h2 { text-align: center; margin-bottom: 20px; }
+        label { display: block; margin-top: 10px; }
+        input[type="text"], input[type="email"], input[type="file"], input[type="number"], select {
+            width: 100%; padding: 8px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            background: #505050;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #333; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>ID Card Generator</h2>
+    <form action="/" method="post" enctype="multipart/form-data">
+        <label for="name">Full Name:</label>
+        <input type="text" name="name" id="name" required>
+
+        <label for="position">Position:</label>
+        <input type="text" name="position" id="position" required>
+
+        <label for="department">Department:</label>
+        <input type="text" name="department" id="department" required>
+
+        <label for="email">Your Email:</label>
+        <input type="email" name="email" id="email" required>
+
+        <label for="photo">Profile Photo:</label>
+        <input type="file" name="photo" id="photo" accept=".jpg,.jpeg,.png" required>
+
+        <label for="photo_size">Photo Size:</label>
+        <select name="photo_size" id="photo_size" required>
+            <option value="1">Small (200 x 250)</option>
+            <option value="2" selected>Medium (250 x 300) [Default]</option>
+            <option value="3">Large (300 x 360)</option>
+            <option value="4">Custom</option>
+        </select>
+
+        <div id="custom_size" style="display:none; margin-top:10px;">
+            <input type="number" name="custom_width" placeholder="Width" min="50">
+            <input type="number" name="custom_height" placeholder="Height" min="50">
+        </div>
+
+        <button type="submit">Generate ID Card</button>
+    </form>
+</div>
+
+<script>
+const photoSize = document.getElementById("photo_size");
+const customDiv = document.getElementById("custom_size");
+
+photoSize.addEventListener("change", () => {
+    if(photoSize.value === "4"){
+        customDiv.style.display = "block";
+    } else {
+        customDiv.style.display = "none";
+    }
+});
+</script>
+</body>
+</html>
