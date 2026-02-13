@@ -5,16 +5,12 @@ from io import BytesIO
 import smtplib
 from email.message import EmailMessage
 
-app = Flask(__name__)
-
 # ================= CONFIG =================
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 ASSETS_DIR = os.path.join(STATIC_DIR, "assets")
 OUTPUT_DIR = os.path.join(STATIC_DIR, "output")
-
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 BACKGROUND_IMAGE = os.path.join(ASSETS_DIR, "background.jpeg")
@@ -28,11 +24,14 @@ PHOTO_BORDER = 6
 
 # Gmail App Password
 SENDER_EMAIL = "lisakhanya5962@gmail.com"
-SENDER_PASSWORD = "hocuaqytnuggqrku" 
+SENDER_PASSWORD = "hocuaqytnuggqrku"
 
 # ========================================
 
+# Tell Flask to look for templates in the current directory
+app = Flask(__name__, template_folder='.')
 
+# ================== EMAIL FUNCTION ==================
 def send_email(receiver, filename, image_bytes):
     if not SENDER_EMAIL or not SENDER_PASSWORD:
         print("Email skipped: credentials not set")
@@ -63,12 +62,11 @@ def send_email(receiver, filename, image_bytes):
     except Exception as e:
         print("Email sending failed:", e)
 
-
 # ================== ROUTES ==================
-
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
+        # Get form data
         name = request.form["name"].upper()
         position = request.form["position"].upper()
         department = request.form["department"].upper()
@@ -82,7 +80,6 @@ def index():
 
         # Photo size selection
         photo_size = request.form.get("photo_size")
-
         if photo_size == "1":
             PHOTO_WIDTH, PHOTO_HEIGHT = 200, 250
         elif photo_size == "2":
@@ -96,7 +93,7 @@ def index():
             except ValueError:
                 PHOTO_WIDTH, PHOTO_HEIGHT = 250, 300
         else:
-            PHOTO_WIDTH, PHOTO_HEIGHT = 250, 300  # default
+            PHOTO_WIDTH, PHOTO_HEIGHT = 250, 300
 
         # Load images
         background = Image.open(BACKGROUND_IMAGE).resize((CARD_WIDTH, CARD_HEIGHT))
@@ -136,7 +133,6 @@ def index():
         # Photo + border
         photo_x = 50
         photo_y = HEADER_HEIGHT + 30
-
         draw.rectangle(
             [
                 (photo_x - PHOTO_BORDER, photo_y - PHOTO_BORDER),
@@ -145,7 +141,6 @@ def index():
             ],
             fill=GRAY
         )
-
         card.paste(photo_img, (photo_x, photo_y))
 
         # Text
