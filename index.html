@@ -38,7 +38,7 @@ canvas { display:block; margin: 30px auto; border-radius: 15px; box-shadow: 0 5p
 
 <div class="container">
     <h2>Frontier Regional Hospital - ID Card Generator</h2>
-    <p>🔹 This version works fully in your browser. No Python or Flask needed.</p>
+    <p>🔹 This static version works in your browser. No Python/Flask needed.</p>
 
     <form id="idForm">
         <label for="name">Full Name</label>
@@ -104,42 +104,64 @@ form.addEventListener('submit', async (e) => {
         if(!isNaN(w) && !isNaN(h)) [photoWidth, photoHeight] = [w,h];
     }
 
-    // Load photo
+    // Load images
+    const background = new Image();
+    background.src = 'background.jpeg';
+    const logo = new Image();
+    logo.src = 'download.jpeg';
     const photo = new Image();
     photo.src = URL.createObjectURL(photoFile);
-    await new Promise(r => photo.onload = r);
+
+    await Promise.all([
+        new Promise(r => background.onload = r),
+        new Promise(r => logo.onload = r),
+        new Promise(r => photo.onload = r)
+    ]);
 
     // Clear canvas
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Background
-    ctx.fillStyle = '#4a90e2'; 
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+    // Draw background (cover)
+    const bgRatio = background.width / background.height;
+    const canvasRatio = canvas.width / canvas.height;
+    let bgDrawWidth = canvas.width;
+    let bgDrawHeight = canvas.height;
+    let bgX = 0;
+    let bgY = 0;
 
-    // Header
-    ctx.fillStyle='rgb(80,80,80)';
+    if(bgRatio > canvasRatio){
+        bgDrawHeight = canvas.height;
+        bgDrawWidth = background.width * (canvas.height / background.height);
+        bgX = (canvas.width - bgDrawWidth)/2;
+    } else {
+        bgDrawWidth = canvas.width;
+        bgDrawHeight = background.height * (canvas.width / background.width);
+        bgY = (canvas.height - bgDrawHeight)/2;
+    }
+
+    ctx.drawImage(background, bgX, bgY, bgDrawWidth, bgDrawHeight);
+
+    // Header overlay
+    ctx.fillStyle='rgba(80,80,80,0.8)';
     ctx.fillRect(0,0,canvas.width,120);
+
+    // Draw logo
+    ctx.drawImage(logo, 30, 20, 150, 80);
+
+    // Hospital name
     ctx.fillStyle='white';
     ctx.font='36px Arial';
     ctx.textAlign='center';
     ctx.fillText('FRONTIER REGIONAL HOSPITAL', canvas.width/2, 70);
 
-    // Logo placeholder
-    ctx.fillStyle='white';
-    ctx.fillRect(30,20,150,80);
-    ctx.fillStyle='gray';
-    ctx.font='20px Arial';
-    ctx.textAlign='center';
-    ctx.fillText('LOGO', 105, 65);
-
-    // Photo border & image
+    // Photo border & user photo
     const PHOTO_BORDER = 6;
     const photoX = 50, photoY = 150;
     ctx.fillStyle='rgb(80,80,80)';
     ctx.fillRect(photoX-PHOTO_BORDER, photoY-PHOTO_BORDER, photoWidth+2*PHOTO_BORDER, photoHeight+2*PHOTO_BORDER);
     ctx.drawImage(photo, photoX, photoY, photoWidth, photoHeight);
 
-    // Text
+    // Text details
     const textX = 350, textY = 200;
     ctx.fillStyle='white';
     ctx.textAlign='left';
