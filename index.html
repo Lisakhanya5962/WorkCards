@@ -38,7 +38,7 @@ canvas { display:block; margin: 30px auto; border-radius: 15px; box-shadow: 0 5p
 
 <div class="container">
     <h2>Frontier Regional Hospital - ID Card Generator</h2>
-    <p>🔹 Note: This static version works in your browser. No Python/Flask needed.</p>
+    <p>🔹 This version works fully in your browser. No Python or Flask needed.</p>
 
     <form id="idForm">
         <label for="name">Full Name</label>
@@ -93,6 +93,8 @@ form.addEventListener('submit', async (e) => {
     const department = document.getElementById('department').value.toUpperCase();
     const photoFile = document.getElementById('photo').files[0];
 
+    if(!photoFile) return alert("Please upload a photo.");
+
     let photoWidth = 250, photoHeight = 300;
     if(photoSize.value === "1") [photoWidth, photoHeight] = [200,250];
     if(photoSize.value === "3") [photoWidth, photoHeight] = [300,360];
@@ -111,10 +113,10 @@ form.addEventListener('submit', async (e) => {
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     // Background
-    ctx.fillStyle = '#4a90e2'; // blue background
+    ctx.fillStyle = '#4a90e2'; 
     ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    // Header & logo placeholder
+    // Header
     ctx.fillStyle='rgb(80,80,80)';
     ctx.fillRect(0,0,canvas.width,120);
     ctx.fillStyle='white';
@@ -122,7 +124,7 @@ form.addEventListener('submit', async (e) => {
     ctx.textAlign='center';
     ctx.fillText('FRONTIER REGIONAL HOSPITAL', canvas.width/2, 70);
 
-    // Logo placeholder box
+    // Logo placeholder
     ctx.fillStyle='white';
     ctx.fillRect(30,20,150,80);
     ctx.fillStyle='gray';
