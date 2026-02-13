@@ -1,55 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Frontier Regional Hospital - ID Card Generator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        /* Your existing CSS for layout */
-    </style>
+<meta charset="UTF-8">
+<title>Frontier Regional Hospital - ID Card Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body { font-family: Arial, sans-serif; padding:20px; background:#f5f5f5; }
+.container { max-width:600px; margin:0 auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 15px rgba(0,0,0,0.2); }
+label, input, select, button { display:block; margin:10px 0; width:100%; font-size:16px; }
+button { padding:10px; background:#505050; color:white; border:none; border-radius:5px; cursor:pointer; }
+button:hover { background:#333; }
+#custom_size { display:none; }
+canvas { display:block; margin:20px auto; border:1px solid #ccc; }
+#downloadLink { display:none; text-align:center; margin-top:10px; display:block; background:#505050; color:white; padding:10px; text-decoration:none; border-radius:5px; }
+#downloadLink:hover { background:#333; }
+</style>
 </head>
 <body>
 <div class="container">
     <h2>ID Card Generator</h2>
-    <form action="/" method="post" enctype="multipart/form-data">
+    <p style="color:red;">🔹 Note: GitHub Pages only serves static files (HTML, CSS, JS). This form does <strong>not</strong> use Flask or Python. All ID card generation happens in your browser.</p>
+
+    <form id="idForm">
         <label for="name">Full Name</label>
-        <input type="text" name="name" id="name" required>
+        <input type="text" id="name" required>
 
         <label for="position">Position</label>
-        <input type="text" name="position" id="position" required>
+        <input type="text" id="position" required>
 
         <label for="department">Department</label>
-        <input type="text" name="department" id="department" required>
-
-        <label for="email">Email Address</label>
-        <input type="email" name="email" id="email" required>
+        <input type="text" id="department" required>
 
         <label for="photo">Profile Photo</label>
-        <input type="file" name="photo" id="photo" accept=".jpg,.jpeg,.png" required>
+        <input type="file" id="photo" accept="image/*" required>
 
         <label for="photo_size">Photo Size</label>
-        <select name="photo_size" id="photo_size" required>
+        <select id="photo_size">
             <option value="1">Small (200 x 250)</option>
             <option value="2" selected>Medium (250 x 300) - Default</option>
             <option value="3">Large (300 x 360)</option>
             <option value="4">Custom Size</option>
         </select>
 
-        <div id="custom_size" style="display:none;">
-            <input type="number" name="custom_width" placeholder="Custom Width (px)" min="50">
-            <input type="number" name="custom_height" placeholder="Custom Height (px)" min="50">
+        <div id="custom_size">
+            <input type="number" id="custom_width" placeholder="Custom Width (px)" min="50">
+            <input type="number" id="custom_height" placeholder="Custom Height (px)" min="50">
         </div>
 
         <button type="submit">Generate ID Card</button>
     </form>
+
+    <canvas id="idCanvas" width="1000" height="600"></canvas>
+    <a id="downloadLink">Download ID Card</a>
 </div>
 
 <script>
-    const photoSize = document.getElementById("photo_size");
-    const customDiv = document.getElementById("custom_size");
-    photoSize.addEventListener("change", function () {
-        customDiv.style.display = (this.value === "4") ? "block" : "none";
-    });
+const form = document.getElementById('idForm');
+const photoSize = document.getElementById('photo_size');
+const customDiv = document.getElementById('custom_size');
+const canvas = document.getElementById('idCanvas');
+const ctx = canvas.getContext('2d');
+const downloadLink = document.getElementById('downloadLink');
+
+photoSize.addEventListener('change', () => {
+    customDiv.style.display = (photoSize.value === "4") ? "block" : "none";
+});
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('name').value.toUpperCase();
+    const position = document.getElementById('position').value.toUpperCase();
+    const department = document.getElementById('department').value.toUpperCase();
+    const photoFile = document.getElementById('photo').files[0];
+
+    let photoWidth = 250, photoHeight = 300;
+    if(photoSize.value === "1") [photoWidth, photoHeight] = [200,250];
+    if(photoSize.value === "3") [photoWidth, photoHeight] = [300,360];
+    if(photoSize.value === "4") {
+        const w = parseInt(document.getElementById('custom_width').value);
+        const h = parseInt(document.getElementById('custom_height').value);
+        if(!isNaN(w) && !isNaN(h)) [photoWidth, photoHeight] = [w,h];
+    }
+
+    // Load images
+    const background = new Image();
+    background.src = 'assets/background.jpeg'; // place this in /assets
+    const logo = new Image();
+    logo.src = 'assets/download.jpeg'; // place this in /assets
+    const photo = new Image();
+    photo.src = URL.createObjectURL(photoFile);
+
+    await Promise.all([
+        new Promise(r=>background.onload=r),
+        new Promise(r=>logo.onload=r),
+        new Promise(r=>photo.onload=r)
+    ]);
+
+    // Clear canvas
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // Draw background
+    ctx.drawImage(background,0,0,canvas.width,canvas.height);
+
+    // Header & logo
+    ctx.fillStyle='rgb(80,80,80)';
+    ctx.fillRect(0,0,canvas.width,120);
+    ctx.drawImage(logo,30,(120-80)/2,150,80);
+
+    // Hospital name
+    ctx.fillStyle='white';
+    ctx.font='36px Arial';
+    ctx.textAlign='center';
+    ctx.fillText('FRONTIER REGIONAL HOSPITAL', canvas.width/2, 70);
+
+    // Photo border & image
+    const PHOTO_BORDER = 6;
+    const photoX = 50, photoY = 120+30;
+    ctx.fillStyle='rgb(80,80,80)';
+    ctx.fillRect(photoX-PHOTO_BORDER, photoY-PHOTO_BORDER, photoWidth+2*PHOTO_BORDER, photoHeight+2*PHOTO_BORDER);
+    ctx.drawImage(photo, photoX, photoY, photoWidth, photoHeight);
+
+    // Text
+    const textX = 350, textY = 120+80;
+    ctx.fillStyle='white';
+    ctx.textAlign='left';
+    ctx.font='50px Arial Bold';
+    ctx.fillText(name, textX, textY);
+    ctx.font='32px Arial';
+    ctx.fillText(position, textX, textY+70);
+    ctx.font='28px Arial';
+    ctx.fillText(department, textX, textY+120);
+
+    // Show download link
+    downloadLink.href = canvas.toDataURL('image/png');
+    downloadLink.download = name.replace(/ /g,'_')+'.png';
+    downloadLink.style.display='block';
+});
 </script>
 </body>
 </html>
