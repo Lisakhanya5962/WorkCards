@@ -92,6 +92,7 @@ form.addEventListener('submit', async (e) => {
     const position = document.getElementById('position').value.toUpperCase();
     const department = document.getElementById('department').value.toUpperCase();
     const photoFile = document.getElementById('photo').files[0];
+
     if(!photoFile) return alert("Please upload a photo.");
 
     let photoWidth = 250, photoHeight = 300;
@@ -120,33 +121,28 @@ form.addEventListener('submit', async (e) => {
     // Clear canvas
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Draw background fully showing bottom
+    // Draw full background (fit entire image, no cropping)
     const bgRatio = background.width / background.height;
     const canvasRatio = canvas.width / canvas.height;
-    let bgDrawWidth = canvas.width;
-    let bgDrawHeight = canvas.height;
-
-    let bgX = 0;
-    let bgY = 0;
+    let bgDrawWidth, bgDrawHeight, bgX, bgY;
 
     if(bgRatio > canvasRatio){
-        // Wider image
+        // wider than canvas
         bgDrawHeight = canvas.height;
-        bgDrawWidth = background.width * (canvas.height / background.height);
+        bgDrawWidth = bgDrawHeight * bgRatio;
         bgX = (canvas.width - bgDrawWidth)/2;
         bgY = 0;
     } else {
-        // Taller image
+        // taller than canvas
         bgDrawWidth = canvas.width;
-        bgDrawHeight = background.height * (canvas.width / background.width);
+        bgDrawHeight = bgDrawWidth / bgRatio;
         bgX = 0;
-        bgY = canvas.height - bgDrawHeight; // align bottom
+        bgY = (canvas.height - bgDrawHeight)/2;
     }
-
     ctx.drawImage(background, bgX, bgY, bgDrawWidth, bgDrawHeight);
 
     // Header overlay
-    ctx.fillStyle='rgba(80,80,80,0.8)';
+    ctx.fillStyle='rgba(80,80,80,0.7)';
     ctx.fillRect(0,0,canvas.width,120);
 
     // Draw logo
@@ -154,7 +150,7 @@ form.addEventListener('submit', async (e) => {
 
     // Hospital name
     ctx.fillStyle='white';
-    ctx.font='36px Arial';
+    ctx.font='36px "Segoe UI", Arial, sans-serif';
     ctx.textAlign='center';
     ctx.fillText('FRONTIER REGIONAL HOSPITAL', canvas.width/2, 70);
 
@@ -165,15 +161,15 @@ form.addEventListener('submit', async (e) => {
     ctx.fillRect(photoX-PHOTO_BORDER, photoY-PHOTO_BORDER, photoWidth+2*PHOTO_BORDER, photoHeight+2*PHOTO_BORDER);
     ctx.drawImage(photo, photoX, photoY, photoWidth, photoHeight);
 
-    // Text details
+    // Text details (readable font)
     const textX = 350, textY = 200;
     ctx.fillStyle='white';
     ctx.textAlign='left';
-    ctx.font='50px Arial Bold';
+    ctx.font='bold 48px "Segoe UI", Arial, sans-serif';
     ctx.fillText(name, textX, textY);
-    ctx.font='32px Arial';
+    ctx.font='32px "Segoe UI", Arial, sans-serif';
     ctx.fillText(position, textX, textY+70);
-    ctx.font='28px Arial';
+    ctx.font='28px "Segoe UI", Arial, sans-serif';
     ctx.fillText(department, textX, textY+120);
 
     // Show download link
