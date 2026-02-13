@@ -28,7 +28,7 @@ SENDER_PASSWORD = "hocuaqytnuggqrku"
 
 # ========================================
 
-# Tell Flask to look for templates in the current directory
+# Flask app using main folder as template folder
 app = Flask(__name__, template_folder='.')
 
 # ================== EMAIL FUNCTION ==================
