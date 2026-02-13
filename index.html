@@ -92,7 +92,6 @@ form.addEventListener('submit', async (e) => {
     const position = document.getElementById('position').value.toUpperCase();
     const department = document.getElementById('department').value.toUpperCase();
     const photoFile = document.getElementById('photo').files[0];
-
     if(!photoFile) return alert("Please upload a photo.");
 
     let photoWidth = 250, photoHeight = 300;
@@ -104,44 +103,53 @@ form.addEventListener('submit', async (e) => {
         if(!isNaN(w) && !isNaN(h)) [photoWidth, photoHeight] = [w,h];
     }
 
-    // Load images correctly
+    // Load images
     const background = new Image();
+    background.src = 'background.jpeg';
     const logo = new Image();
+    logo.src = 'download.jpeg';
     const photo = new Image();
+    photo.src = URL.createObjectURL(photoFile);
 
-    const loadImage = (img, src) => new Promise(resolve => { img.onload = resolve; img.src = src; });
     await Promise.all([
-        loadImage(background, 'background.jpeg'),
-        loadImage(logo, 'download.jpeg'),
-        loadImage(photo, URL.createObjectURL(photoFile))
+        new Promise(r => background.onload = r),
+        new Promise(r => logo.onload = r),
+        new Promise(r => photo.onload = r)
     ]);
 
     // Clear canvas
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Draw background as cover
+    // Draw background fully showing bottom
     const bgRatio = background.width / background.height;
     const canvasRatio = canvas.width / canvas.height;
     let bgDrawWidth = canvas.width;
     let bgDrawHeight = canvas.height;
-    let bgX = 0, bgY = 0;
+
+    let bgX = 0;
+    let bgY = 0;
 
     if(bgRatio > canvasRatio){
+        // Wider image
         bgDrawHeight = canvas.height;
         bgDrawWidth = background.width * (canvas.height / background.height);
         bgX = (canvas.width - bgDrawWidth)/2;
+        bgY = 0;
     } else {
+        // Taller image
         bgDrawWidth = canvas.width;
         bgDrawHeight = background.height * (canvas.width / background.width);
-        bgY = (canvas.height - bgDrawHeight)/2;
+        bgX = 0;
+        bgY = canvas.height - bgDrawHeight; // align bottom
     }
+
     ctx.drawImage(background, bgX, bgY, bgDrawWidth, bgDrawHeight);
 
     // Header overlay
-    ctx.fillStyle='rgba(80,80,80,0.7)';
+    ctx.fillStyle='rgba(80,80,80,0.8)';
     ctx.fillRect(0,0,canvas.width,120);
 
-    // Logo
+    // Draw logo
     ctx.drawImage(logo, 30, 20, 150, 80);
 
     // Hospital name
@@ -150,7 +158,7 @@ form.addEventListener('submit', async (e) => {
     ctx.textAlign='center';
     ctx.fillText('FRONTIER REGIONAL HOSPITAL', canvas.width/2, 70);
 
-    // User photo
+    // Photo border & user photo
     const PHOTO_BORDER = 6;
     const photoX = 50, photoY = 150;
     ctx.fillStyle='rgb(80,80,80)';
@@ -168,12 +176,11 @@ form.addEventListener('submit', async (e) => {
     ctx.font='28px Arial';
     ctx.fillText(department, textX, textY+120);
 
-    // Download link
+    // Show download link
     downloadLink.href = canvas.toDataURL('image/png');
     downloadLink.download = name.replace(/ /g,'_')+'.png';
     downloadLink.style.display='inline-block';
 });
 </script>
-
 </body>
 </html>
