@@ -5,56 +5,29 @@
 <title>Frontier Regional Hospital - ID Card Generator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-/* Reset and base */
 * { box-sizing: border-box; margin:0; padding:0; }
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; color:#333; }
 .container { max-width: 700px; margin: 40px auto; background: #fff; padding: 30px 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 
-/* Heading */
 h2 { text-align: center; margin-bottom: 15px; color:#505050; }
-
-/* Note */
 p { text-align: center; margin-bottom: 25px; color:red; }
 
-/* Form styling */
 form { display: flex; flex-direction: column; gap: 15px; }
 label { font-weight: 600; margin-bottom: 5px; }
 input, select { padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
 input:focus, select:focus { outline:none; border-color:#505050; box-shadow:0 0 5px rgba(80,80,80,0.3); }
 
-/* Photo custom size */
-#custom_size {
-    display:none;
-    flex-direction: row;
-    gap:10px;
-}
-#custom_size input {
-    flex:1;
-}
+#custom_size { display:none; flex-direction: row; gap:10px; }
+#custom_size input { flex:1; }
 
-/* Button styling */
 button { padding: 15px; font-size: 16px; font-weight: 600; border:none; border-radius:10px; background:#505050; color:#fff; cursor:pointer; transition: 0.3s; }
 button:hover { background:#333; }
 
-/* Canvas styling */
 canvas { display:block; margin: 30px auto; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); max-width:100%; }
 
-/* Download link */
-#downloadLink {
-    display:none;
-    margin: 20px auto;
-    text-align:center;
-    padding: 12px 20px;
-    background:#505050;
-    color:white;
-    text-decoration:none;
-    border-radius:10px;
-    font-weight:600;
-    transition:0.3s;
-}
+#downloadLink { display:none; margin: 20px auto; text-align:center; padding: 12px 20px; background:#505050; color:white; text-decoration:none; border-radius:10px; font-weight:600; transition:0.3s; }
 #downloadLink:hover { background:#333; }
 
-/* Responsive adjustments */
 @media(max-width:768px){
     .container { padding:20px; }
     canvas { width: 100%; height:auto; }
@@ -65,7 +38,7 @@ canvas { display:block; margin: 30px auto; border-radius: 15px; box-shadow: 0 5p
 
 <div class="container">
     <h2>Frontier Regional Hospital - ID Card Generator</h2>
-    <p>🔹 Note: GitHub Pages only serves static files (HTML, CSS, JS). This form does <strong>not</strong> use Flask or Python. All ID card generation happens in your browser.</p>
+    <p>🔹 Note: This static version works in your browser. No Python/Flask needed.</p>
 
     <form id="idForm">
         <label for="name">Full Name</label>
@@ -129,36 +102,33 @@ form.addEventListener('submit', async (e) => {
         if(!isNaN(w) && !isNaN(h)) [photoWidth, photoHeight] = [w,h];
     }
 
-    // Load images
-    const background = new Image();
-    background.src = 'assets/background.jpeg';
-    const logo = new Image();
-    logo.src = 'assets/download.jpeg';
+    // Load photo
     const photo = new Image();
     photo.src = URL.createObjectURL(photoFile);
-
-    await Promise.all([
-        new Promise(r=>background.onload=r),
-        new Promise(r=>logo.onload=r),
-        new Promise(r=>photo.onload=r)
-    ]);
+    await new Promise(r => photo.onload = r);
 
     // Clear canvas
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Draw background
-    ctx.drawImage(background,0,0,canvas.width,canvas.height);
+    // Background
+    ctx.fillStyle = '#4a90e2'; // blue background
+    ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    // Header & logo
+    // Header & logo placeholder
     ctx.fillStyle='rgb(80,80,80)';
     ctx.fillRect(0,0,canvas.width,120);
-    ctx.drawImage(logo,30,(120-80)/2,150,80);
-
-    // Hospital name
     ctx.fillStyle='white';
     ctx.font='36px Arial';
     ctx.textAlign='center';
     ctx.fillText('FRONTIER REGIONAL HOSPITAL', canvas.width/2, 70);
+
+    // Logo placeholder box
+    ctx.fillStyle='white';
+    ctx.fillRect(30,20,150,80);
+    ctx.fillStyle='gray';
+    ctx.font='20px Arial';
+    ctx.textAlign='center';
+    ctx.fillText('LOGO', 105, 65);
 
     // Photo border & image
     const PHOTO_BORDER = 6;
