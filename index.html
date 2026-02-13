@@ -14,7 +14,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:
 h2 { text-align: center; margin-bottom: 15px; color:#505050; }
 
 /* Note */
-p { text-align: center; margin-bottom: 25px; }
+p { text-align: center; margin-bottom: 25px; color:red; }
 
 /* Form styling */
 form { display: flex; flex-direction: column; gap: 15px; }
@@ -23,8 +23,14 @@ input, select { padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; 
 input:focus, select:focus { outline:none; border-color:#505050; box-shadow:0 0 5px rgba(80,80,80,0.3); }
 
 /* Photo custom size */
-#custom_size { display:none; gap:10px; }
-#custom_size input { width: calc(50% - 5px); display: inline-block; }
+#custom_size {
+    display:none;
+    flex-direction: row;
+    gap:10px;
+}
+#custom_size input {
+    flex:1;
+}
 
 /* Button styling */
 button { padding: 15px; font-size: 16px; font-weight: 600; border:none; border-radius:10px; background:#505050; color:#fff; cursor:pointer; transition: 0.3s; }
@@ -34,7 +40,18 @@ button:hover { background:#333; }
 canvas { display:block; margin: 30px auto; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); max-width:100%; }
 
 /* Download link */
-#downloadLink { display:none; margin: 0 auto; text-align:center; padding: 12px 20px; background:#505050; color:white; text-decoration:none; border-radius:10px; font-weight:600; display:inline-block; transition:0.3s; }
+#downloadLink {
+    display:none;
+    margin: 20px auto;
+    text-align:center;
+    padding: 12px 20px;
+    background:#505050;
+    color:white;
+    text-decoration:none;
+    border-radius:10px;
+    font-weight:600;
+    transition:0.3s;
+}
 #downloadLink:hover { background:#333; }
 
 /* Responsive adjustments */
@@ -48,7 +65,7 @@ canvas { display:block; margin: 30px auto; border-radius: 15px; box-shadow: 0 5p
 
 <div class="container">
     <h2>Frontier Regional Hospital - ID Card Generator</h2>
-    <p style="color:red;">🔹 Note: GitHub Pages only serves static files (HTML, CSS, JS). This form does <strong>not</strong> use Flask or Python. All ID card generation happens in your browser.</p>
+    <p>🔹 Note: GitHub Pages only serves static files (HTML, CSS, JS). This form does <strong>not</strong> use Flask or Python. All ID card generation happens in your browser.</p>
 
     <form id="idForm">
         <label for="name">Full Name</label>
@@ -145,13 +162,13 @@ form.addEventListener('submit', async (e) => {
 
     // Photo border & image
     const PHOTO_BORDER = 6;
-    const photoX = 50, photoY = 120+30;
+    const photoX = 50, photoY = 150;
     ctx.fillStyle='rgb(80,80,80)';
     ctx.fillRect(photoX-PHOTO_BORDER, photoY-PHOTO_BORDER, photoWidth+2*PHOTO_BORDER, photoHeight+2*PHOTO_BORDER);
     ctx.drawImage(photo, photoX, photoY, photoWidth, photoHeight);
 
     // Text
-    const textX = 350, textY = 120+80;
+    const textX = 350, textY = 200;
     ctx.fillStyle='white';
     ctx.textAlign='left';
     ctx.font='50px Arial Bold';
