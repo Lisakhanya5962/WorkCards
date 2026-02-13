@@ -5,31 +5,60 @@
 <title>Frontier Regional Hospital - ID Card Generator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body { font-family: Arial, sans-serif; padding:20px; background:#f5f5f5; }
-.container { max-width:600px; margin:0 auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 15px rgba(0,0,0,0.2); }
-label, input, select, button { display:block; margin:10px 0; width:100%; font-size:16px; }
-button { padding:10px; background:#505050; color:white; border:none; border-radius:5px; cursor:pointer; }
+/* Reset and base */
+* { box-sizing: border-box; margin:0; padding:0; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; color:#333; }
+.container { max-width: 700px; margin: 40px auto; background: #fff; padding: 30px 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+
+/* Heading */
+h2 { text-align: center; margin-bottom: 15px; color:#505050; }
+
+/* Note */
+p { text-align: center; margin-bottom: 25px; }
+
+/* Form styling */
+form { display: flex; flex-direction: column; gap: 15px; }
+label { font-weight: 600; margin-bottom: 5px; }
+input, select { padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+input:focus, select:focus { outline:none; border-color:#505050; box-shadow:0 0 5px rgba(80,80,80,0.3); }
+
+/* Photo custom size */
+#custom_size { display:none; gap:10px; }
+#custom_size input { width: calc(50% - 5px); display: inline-block; }
+
+/* Button styling */
+button { padding: 15px; font-size: 16px; font-weight: 600; border:none; border-radius:10px; background:#505050; color:#fff; cursor:pointer; transition: 0.3s; }
 button:hover { background:#333; }
-#custom_size { display:none; }
-canvas { display:block; margin:20px auto; border:1px solid #ccc; }
-#downloadLink { display:none; text-align:center; margin-top:10px; display:block; background:#505050; color:white; padding:10px; text-decoration:none; border-radius:5px; }
+
+/* Canvas styling */
+canvas { display:block; margin: 30px auto; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); max-width:100%; }
+
+/* Download link */
+#downloadLink { display:none; margin: 0 auto; text-align:center; padding: 12px 20px; background:#505050; color:white; text-decoration:none; border-radius:10px; font-weight:600; display:inline-block; transition:0.3s; }
 #downloadLink:hover { background:#333; }
+
+/* Responsive adjustments */
+@media(max-width:768px){
+    .container { padding:20px; }
+    canvas { width: 100%; height:auto; }
+}
 </style>
 </head>
 <body>
+
 <div class="container">
-    <h2>ID Card Generator</h2>
+    <h2>Frontier Regional Hospital - ID Card Generator</h2>
     <p style="color:red;">🔹 Note: GitHub Pages only serves static files (HTML, CSS, JS). This form does <strong>not</strong> use Flask or Python. All ID card generation happens in your browser.</p>
 
     <form id="idForm">
         <label for="name">Full Name</label>
-        <input type="text" id="name" required>
+        <input type="text" id="name" placeholder="Enter your full name" required>
 
         <label for="position">Position</label>
-        <input type="text" id="position" required>
+        <input type="text" id="position" placeholder="Enter your position" required>
 
         <label for="department">Department</label>
-        <input type="text" id="department" required>
+        <input type="text" id="department" placeholder="Enter your department" required>
 
         <label for="photo">Profile Photo</label>
         <input type="file" id="photo" accept="image/*" required>
@@ -63,7 +92,7 @@ const ctx = canvas.getContext('2d');
 const downloadLink = document.getElementById('downloadLink');
 
 photoSize.addEventListener('change', () => {
-    customDiv.style.display = (photoSize.value === "4") ? "block" : "none";
+    customDiv.style.display = (photoSize.value === "4") ? "flex" : "none";
 });
 
 form.addEventListener('submit', async (e) => {
@@ -85,9 +114,9 @@ form.addEventListener('submit', async (e) => {
 
     // Load images
     const background = new Image();
-    background.src = 'assets/background.jpeg'; // place this in /assets
+    background.src = 'assets/background.jpeg';
     const logo = new Image();
-    logo.src = 'assets/download.jpeg'; // place this in /assets
+    logo.src = 'assets/download.jpeg';
     const photo = new Image();
     photo.src = URL.createObjectURL(photoFile);
 
@@ -135,7 +164,7 @@ form.addEventListener('submit', async (e) => {
     // Show download link
     downloadLink.href = canvas.toDataURL('image/png');
     downloadLink.download = name.replace(/ /g,'_')+'.png';
-    downloadLink.style.display='block';
+    downloadLink.style.display='inline-block';
 });
 </script>
 </body>
