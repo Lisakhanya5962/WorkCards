@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ID Card Generated</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            width: 400px;
+            text-align: center;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #505050;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        a:hover { background: #333; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Success!</h2>
+    <p>Your ID card for <strong>{{ name }}</strong> has been generated.</p>
+    <p>It has also been sent to your email.</p>
+    <a href="{{ url_for('static', filename='output/' + filename) }}" download>Download ID Card</a>
+</div>
+</body>
+</html>
