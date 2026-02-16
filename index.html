@@ -52,7 +52,7 @@ button{
 }
 
 canvas{
-    display:none; /* Hidden until generated */
+    display:none;
     width:100%;
     height:auto;
     margin-top:25px;
@@ -130,7 +130,6 @@ const form=document.getElementById("idForm");
 const downloadLink=document.getElementById("downloadLink");
 
 let uploadedPhoto=null;
-const generatedID="FRH-"+Math.floor(Math.random()*100000);
 
 photoSizeSelect.addEventListener("change",()=>{
     customDiv.style.display = photoSizeSelect.value==="custom" ? "flex" : "none";
@@ -144,7 +143,7 @@ function getPhotoSize(){
         const h=parseInt(document.getElementById("customH").value)||300;
         return [w,h];
     }
-    return [250,300]; // MEDIUM DEFAULT
+    return [250,300]; // Medium default
 }
 
 function fitText(text,maxWidth,startSize){
@@ -157,21 +156,23 @@ function fitText(text,maxWidth,startSize){
 }
 
 function drawID(){
+
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     const background=new Image();
     background.src="background.jpeg";
 
     const logo=new Image();
-    logo.src="download.jpeg"; // YOUR LOGO NAME
+    logo.src="download.jpeg";
 
     background.onload=()=>{
         ctx.drawImage(background,0,0,canvas.width,canvas.height);
 
-        ctx.fillStyle="rgba(0,0,0,0.6)";
+        // Dark gray header
+        ctx.fillStyle="#333333";
         ctx.fillRect(0,0,canvas.width,120);
 
-        ctx.fillStyle="#fff";
+        ctx.fillStyle="#ffffff";
         ctx.font="bold 40px Segoe UI";
         ctx.textAlign="center";
         ctx.fillText("FRONTIER REGIONAL HOSPITAL",canvas.width/2,75);
@@ -180,9 +181,15 @@ function drawID(){
             ctx.drawImage(logo,30,20,120,80);
 
             const [photoW,photoH]=getPhotoSize();
+            const photoX=70;
+            const photoY=170;
+
+            // Dark gray border around profile photo
+            ctx.fillStyle="#444444";
+            ctx.fillRect(photoX-6,photoY-6,photoW+12,photoH+12);
 
             if(uploadedPhoto)
-                ctx.drawImage(uploadedPhoto,70,170,photoW,photoH);
+                ctx.drawImage(uploadedPhoto,photoX,photoY,photoW,photoH);
 
             const textX=400;
             const maxWidth=500;
@@ -191,7 +198,7 @@ function drawID(){
             let nameSize=fitText(name,maxWidth,50);
 
             ctx.textAlign="left";
-            ctx.fillStyle="#fff";
+            ctx.fillStyle="#ffffff";
             ctx.font="bold "+nameSize+"px Segoe UI";
             ctx.fillText(name,textX,260);
 
@@ -200,9 +207,6 @@ function drawID(){
 
             ctx.font="26px Segoe UI";
             ctx.fillText(departmentInput.value.toUpperCase(),textX,380);
-
-            ctx.font="22px Segoe UI";
-            ctx.fillText("ID: "+generatedID,textX,430);
 
             canvas.style.display="block";
             downloadLink.style.display="inline-block";
