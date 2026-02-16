@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Frontier Regional Hospital - Professional ID Generator</title>
+<title>Frontier Regional Hospital - ID Generator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -52,7 +52,7 @@ button{
 }
 
 canvas{
-    display:block;
+    display:none; /* Hidden until generated */
     width:100%;
     height:auto;
     margin-top:25px;
@@ -77,7 +77,7 @@ canvas{
 <body>
 
 <div class="container">
-<h2>Frontier Regional Hospital – Professional ID System</h2>
+<h2>Frontier Regional Hospital – ID Generator</h2>
 
 <form id="idForm">
 
@@ -106,18 +106,17 @@ canvas{
 <input type="number" id="customH" placeholder="Height px">
 </div>
 
-<button type="submit">Download ID Card</button>
+<button type="submit">Generate ID Card</button>
 
 </form>
 
 <canvas id="idCanvas"></canvas>
-<a id="downloadLink">Download ID</a>
+<a id="downloadLink">Download ID Card</a>
 </div>
 
 <script>
 const canvas=document.getElementById("idCanvas");
 const ctx=canvas.getContext("2d");
-
 canvas.width=1000;
 canvas.height=600;
 
@@ -133,27 +132,9 @@ const downloadLink=document.getElementById("downloadLink");
 let uploadedPhoto=null;
 const generatedID="FRH-"+Math.floor(Math.random()*100000);
 
-// Show custom size inputs
 photoSizeSelect.addEventListener("change",()=>{
     customDiv.style.display = photoSizeSelect.value==="custom" ? "flex" : "none";
-    drawID();
 });
-
-// Auto resize text
-function fitText(text,maxWidth,startSize){
-    let size=startSize;
-    do{
-        ctx.font="bold "+size+"px Segoe UI";
-        size--;
-    }while(ctx.measureText(text).width>maxWidth && size>20);
-    return size;
-}
-
-const background=new Image();
-background.src="background.jpeg";
-
-const logo=new Image();
-logo.src="logo.jpeg";
 
 function getPhotoSize(){
     if(photoSizeSelect.value==="small") return [200,250];
@@ -163,81 +144,88 @@ function getPhotoSize(){
         const h=parseInt(document.getElementById("customH").value)||300;
         return [w,h];
     }
-    return [250,300];
+    return [250,300]; // MEDIUM DEFAULT
+}
+
+function fitText(text,maxWidth,startSize){
+    let size=startSize;
+    do{
+        ctx.font="bold "+size+"px Segoe UI";
+        size--;
+    }while(ctx.measureText(text).width>maxWidth && size>20);
+    return size;
 }
 
 function drawID(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Draw background image
-    if(background.complete)
+    const background=new Image();
+    background.src="background.jpeg";
+
+    const logo=new Image();
+    logo.src="download.jpeg"; // YOUR LOGO NAME
+
+    background.onload=()=>{
         ctx.drawImage(background,0,0,canvas.width,canvas.height);
 
-    // Dark header overlay
-    ctx.fillStyle="rgba(0,0,0,0.6)";
-    ctx.fillRect(0,0,canvas.width,120);
+        ctx.fillStyle="rgba(0,0,0,0.6)";
+        ctx.fillRect(0,0,canvas.width,120);
 
-    ctx.fillStyle="#fff";
-    ctx.font="bold 40px Segoe UI";
-    ctx.textAlign="center";
-    ctx.fillText("FRONTIER REGIONAL HOSPITAL",canvas.width/2,75);
+        ctx.fillStyle="#fff";
+        ctx.font="bold 40px Segoe UI";
+        ctx.textAlign="center";
+        ctx.fillText("FRONTIER REGIONAL HOSPITAL",canvas.width/2,75);
 
-    // Logo
-    if(logo.complete)
-        ctx.drawImage(logo,30,20,120,80);
+        logo.onload=()=>{
+            ctx.drawImage(logo,30,20,120,80);
 
-    const [photoW,photoH]=getPhotoSize();
+            const [photoW,photoH]=getPhotoSize();
 
-    if(uploadedPhoto)
-        ctx.drawImage(uploadedPhoto,70,170,photoW,photoH);
+            if(uploadedPhoto)
+                ctx.drawImage(uploadedPhoto,70,170,photoW,photoH);
 
-    const textX=400;
-    const maxWidth=500;
+            const textX=400;
+            const maxWidth=500;
 
-    const name=(nameInput.value||"FULL NAME").toUpperCase();
-    let nameSize=fitText(name,maxWidth,50);
+            const name=nameInput.value.toUpperCase();
+            let nameSize=fitText(name,maxWidth,50);
 
-    ctx.textAlign="left";
-    ctx.fillStyle="#fff";
-    ctx.font="bold "+nameSize+"px Segoe UI";
-    ctx.fillText(name,textX,260);
+            ctx.textAlign="left";
+            ctx.fillStyle="#fff";
+            ctx.font="bold "+nameSize+"px Segoe UI";
+            ctx.fillText(name,textX,260);
 
-    ctx.font="32px Segoe UI";
-    ctx.fillText((positionInput.value||"POSITION").toUpperCase(),textX,330);
+            ctx.font="32px Segoe UI";
+            ctx.fillText(positionInput.value.toUpperCase(),textX,330);
 
-    ctx.font="26px Segoe UI";
-    ctx.fillText((departmentInput.value||"DEPARTMENT").toUpperCase(),textX,380);
+            ctx.font="26px Segoe UI";
+            ctx.fillText(departmentInput.value.toUpperCase(),textX,380);
 
-    ctx.font="22px Segoe UI";
-    ctx.fillText("ID: "+generatedID,textX,430);
+            ctx.font="22px Segoe UI";
+            ctx.fillText("ID: "+generatedID,textX,430);
+
+            canvas.style.display="block";
+            downloadLink.style.display="inline-block";
+
+            downloadLink.href=canvas.toDataURL("image/png");
+            downloadLink.download=name.replace(/ /g,"_")+"_ID.png";
+        }
+    }
 }
-
-[nameInput,positionInput,departmentInput].forEach(input=>{
-    input.addEventListener("input",drawID);
-});
 
 photoInput.addEventListener("change",e=>{
     const file=e.target.files[0];
     if(!file) return;
     const img=new Image();
-    img.onload=()=>{
-        uploadedPhoto=img;
-        drawID();
-    };
+    img.onload=()=>{uploadedPhoto=img;}
     img.src=URL.createObjectURL(file);
 });
 
 form.addEventListener("submit",e=>{
     e.preventDefault();
+    if(!uploadedPhoto){ alert("Upload photo first."); return;}
     drawID();
-    downloadLink.href=canvas.toDataURL("image/png");
-    downloadLink.download=nameInput.value.replace(/ /g,"_")+"_ID.png";
-    downloadLink.style.display="block";
 });
-
-background.onload=drawID;
-logo.onload=drawID;
-drawID();
 </script>
 
 </body>
