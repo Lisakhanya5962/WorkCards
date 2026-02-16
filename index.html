@@ -2,183 +2,221 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Frontier Regional Hospital - ID Card Generator</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frontier Regional Hospital - Professional ID Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
 <style>
-* { box-sizing: border-box; margin:0; padding:0; }
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; color:#333; }
-.container { max-width: 700px; margin: 40px auto; background: #fff; padding: 30px 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+*{box-sizing:border-box;margin:0;padding:0}
 
-h2 { text-align: center; margin-bottom: 15px; color:#505050; }
-p { text-align: center; margin-bottom: 25px; color:red; }
+body{
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#1f2937,#111827);
+    color:#333;
+}
 
-form { display: flex; flex-direction: column; gap: 15px; }
-label { font-weight: 600; margin-bottom: 5px; }
-input, select { padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
-input:focus, select:focus { outline:none; border-color:#505050; box-shadow:0 0 5px rgba(80,80,80,0.3); }
+.container{
+    max-width:750px;
+    margin:20px auto;
+    background:#ffffff;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.3);
+}
 
-#custom_size { display:none; flex-direction: row; gap:10px; }
-#custom_size input { flex:1; }
+h2{
+    text-align:center;
+    margin-bottom:20px;
+    color:#1f2937;
+}
 
-button { padding: 15px; font-size: 16px; font-weight: 600; border:none; border-radius:10px; background:#505050; color:#fff; cursor:pointer; transition: 0.3s; }
-button:hover { background:#333; }
+form{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
 
-canvas { display:block; margin: 30px auto; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); max-width:100%; }
+label{
+    font-weight:600;
+    font-size:14px;
+}
 
-#downloadLink { display:none; margin: 20px auto; text-align:center; padding: 12px 20px; background:#505050; color:white; text-decoration:none; border-radius:10px; font-weight:600; transition:0.3s; }
-#downloadLink:hover { background:#333; }
+input{
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    font-size:15px;
+}
 
-@media(max-width:768px){
-    .container { padding:20px; }
-    canvas { width: 100%; height:auto; }
+input:focus{
+    outline:none;
+    border-color:#1f2937;
+}
+
+button{
+    padding:14px;
+    font-size:16px;
+    font-weight:bold;
+    border:none;
+    border-radius:12px;
+    background:#1f2937;
+    color:white;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    background:#000;
+}
+
+canvas{
+    display:block;
+    width:100%;
+    height:auto;
+    margin-top:25px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
+
+#downloadLink{
+    display:none;
+    margin-top:15px;
+    text-align:center;
+    padding:12px;
+    background:#1f2937;
+    color:white;
+    text-decoration:none;
+    border-radius:12px;
+    font-weight:bold;
 }
 </style>
 </head>
+
 <body>
 
 <div class="container">
-    <h2>Frontier Regional Hospital - ID Card Generator</h2>
-    
+<h2>Frontier Regional Hospital – Professional ID System</h2>
 
-    <form id="idForm">
-        <label for="name">Full Name</label>
-        <input type="text" id="name" placeholder="Enter your full name" required>
+<form id="idForm">
+<label>Full Name</label>
+<input type="text" id="name" required>
 
-        <label for="position">Position</label>
-        <input type="text" id="position" placeholder="Enter your position" required>
+<label>Position</label>
+<input type="text" id="position" required>
 
-        <label for="department">Department</label>
-        <input type="text" id="department" placeholder="Enter your department" required>
+<label>Department</label>
+<input type="text" id="department" required>
 
-        <label for="photo">Profile Photo</label>
-        <input type="file" id="photo" accept="image/*" required>
+<label>Profile Photo</label>
+<input type="file" id="photo" accept="image/*" required>
 
-        <label for="photo_size">Photo Size</label>
-        <select id="photo_size">
-            <option value="1">Small (200 x 250)</option>
-            <option value="2" selected>Medium (250 x 300) - Default</option>
-            <option value="3">Large (300 x 360)</option>
-            <option value="4">Custom Size</option>
-        </select>
+<button type="submit">Download ID Card</button>
+</form>
 
-        <div id="custom_size">
-            <input type="number" id="custom_width" placeholder="Custom Width (px)" min="50">
-            <input type="number" id="custom_height" placeholder="Custom Height (px)" min="50">
-        </div>
-
-        <button type="submit">Generate ID Card</button>
-    </form>
-
-    <canvas id="idCanvas" width="1000" height="600"></canvas>
-    <p>🔹 When you print height= 5,4 cm width= 9cm</p>
-    <a id="downloadLink">Download ID Card</a>
+<canvas id="idCanvas"></canvas>
+<a id="downloadLink">Download ID</a>
 </div>
 
 <script>
-const form = document.getElementById('idForm');
-const photoSize = document.getElementById('photo_size');
-const customDiv = document.getElementById('custom_size');
-const canvas = document.getElementById('idCanvas');
-const ctx = canvas.getContext('2d');
-const downloadLink = document.getElementById('downloadLink');
+const canvas = document.getElementById("idCanvas");
+const ctx = canvas.getContext("2d");
 
-photoSize.addEventListener('change', () => {
-    customDiv.style.display = (photoSize.value === "4") ? "flex" : "none";
-});
+// High resolution for printing
+canvas.width = 1000;
+canvas.height = 600;
 
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+const nameInput = document.getElementById("name");
+const positionInput = document.getElementById("position");
+const departmentInput = document.getElementById("department");
+const photoInput = document.getElementById("photo");
+const form = document.getElementById("idForm");
+const downloadLink = document.getElementById("downloadLink");
 
-    const name = document.getElementById('name').value.toUpperCase();
-    const position = document.getElementById('position').value.toUpperCase();
-    const department = document.getElementById('department').value.toUpperCase();
-    const photoFile = document.getElementById('photo').files[0];
+let uploadedPhoto = null;
 
-    if(!photoFile) return alert("Please upload a photo.");
+/* AUTO FONT RESIZE FUNCTION */
+function fitText(text, maxWidth, startSize){
+    let size = startSize;
+    do{
+        ctx.font = "bold "+size+"px Segoe UI";
+        size--;
+    }while(ctx.measureText(text).width > maxWidth && size > 20);
+    return size;
+}
 
-    let photoWidth = 250, photoHeight = 300;
-    if(photoSize.value === "1") [photoWidth, photoHeight] = [200,250];
-    if(photoSize.value === "3") [photoWidth, photoHeight] = [300,360];
-    if(photoSize.value === "4") {
-        const w = parseInt(document.getElementById('custom_width').value);
-        const h = parseInt(document.getElementById('custom_height').value);
-        if(!isNaN(w) && !isNaN(h)) [photoWidth, photoHeight] = [w,h];
-    }
-
-    // Load images
-    const background = new Image();
-    background.src = 'background.jpeg';
-    const logo = new Image();
-    logo.src = 'download.jpeg';
-    const photo = new Image();
-    photo.src = URL.createObjectURL(photoFile);
-
-    await Promise.all([
-        new Promise(r => background.onload = r),
-        new Promise(r => logo.onload = r),
-        new Promise(r => photo.onload = r)
-    ]);
-
-    // Clear canvas
+/* DRAW ID CARD */
+function drawID(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Draw full background (fit entire image, no cropping)
-    const bgRatio = background.width / background.height;
-    const canvasRatio = canvas.width / canvas.height;
-    let bgDrawWidth, bgDrawHeight, bgX, bgY;
-
-    if(bgRatio > canvasRatio){
-        // wider than canvas
-        bgDrawHeight = canvas.height;
-        bgDrawWidth = bgDrawHeight * bgRatio;
-        bgX = (canvas.width - bgDrawWidth)/2;
-        bgY = 0;
-    } else {
-        // taller than canvas
-        bgDrawWidth = canvas.width;
-        bgDrawHeight = bgDrawWidth / bgRatio;
-        bgX = 0;
-        bgY = (canvas.height - bgDrawHeight)/2;
-    }
-    ctx.drawImage(background, bgX, bgY, bgDrawWidth, bgDrawHeight);
-
-    // Header overlay
-    ctx.fillStyle='rgba(80,80,80,0.7)';
+    // Background
+    ctx.fillStyle="#1f2937";
     ctx.fillRect(0,0,canvas.width,120);
 
-    // Draw logo
-    ctx.drawImage(logo, 30, 20, 150, 80);
+    ctx.fillStyle="#ffffff";
+    ctx.font="bold 40px Segoe UI";
+    ctx.textAlign="center";
+    ctx.fillText("FRONTIER REGIONAL HOSPITAL", canvas.width/2,75);
 
-    // Hospital name
-    ctx.fillStyle='white';
-    ctx.font='36px "Segoe UI", Arial, sans-serif';
-    ctx.textAlign='center';
-    ctx.fillText('FRONTIER REGIONAL HOSPITAL', canvas.width/2, 70);
+    // White card body
+    ctx.fillStyle="#ffffff";
+    ctx.fillRect(0,120,canvas.width,480);
 
-    // Photo border & user photo
-    const PHOTO_BORDER = 6;
-    const photoX = 50, photoY = 150;
-    ctx.fillStyle='rgb(80,80,80)';
-    ctx.fillRect(photoX-PHOTO_BORDER, photoY-PHOTO_BORDER, photoWidth+2*PHOTO_BORDER, photoHeight+2*PHOTO_BORDER);
-    ctx.drawImage(photo, photoX, photoY, photoWidth, photoHeight);
+    // Decorative line
+    ctx.fillStyle="#1f2937";
+    ctx.fillRect(0,120,15,480);
 
-    // Text details (readable font)
-    const textX = 350, textY = 200;
-    ctx.fillStyle='white';
-    ctx.textAlign='left';
-    ctx.font='bold 48px "Segoe UI", Arial, sans-serif';
-    ctx.fillText(name, textX, textY);
-    ctx.font='32px "Segoe UI", Arial, sans-serif';
-    ctx.fillText(position, textX, textY+70);
-    ctx.font='28px "Segoe UI", Arial, sans-serif';
-    ctx.fillText(department, textX, textY+120);
+    // Photo
+    if(uploadedPhoto){
+        ctx.drawImage(uploadedPhoto,70,170,250,300);
+    }
 
-    // Show download link
-    downloadLink.href = canvas.toDataURL('image/png');
-    downloadLink.download = name.replace(/ /g,'_')+'.png';
-    downloadLink.style.display='inline-block';
+    const textX = 380;
+    const maxTextWidth = 550;
+
+    // Name with auto resize
+    const name = nameInput.value.toUpperCase();
+    let nameSize = fitText(name,maxTextWidth,50);
+    ctx.font="bold "+nameSize+"px Segoe UI";
+    ctx.fillStyle="#111827";
+    ctx.textAlign="left";
+    ctx.fillText(name,textX,250);
+
+    ctx.font="32px Segoe UI";
+    ctx.fillText(positionInput.value.toUpperCase(),textX,320);
+
+    ctx.font="26px Segoe UI";
+    ctx.fillText(departmentInput.value.toUpperCase(),textX,370);
+
+    // ID number
+    ctx.font="20px Segoe UI";
+    ctx.fillStyle="#555";
+    ctx.fillText("ID: FRH-"+Math.floor(Math.random()*100000),textX,420);
+}
+
+/* LIVE PREVIEW */
+[nameInput,positionInput,departmentInput].forEach(input=>{
+    input.addEventListener("input",drawID);
+});
+
+photoInput.addEventListener("change",(e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const img = new Image();
+    img.onload=()=>{
+        uploadedPhoto=img;
+        drawID();
+    };
+    img.src=URL.createObjectURL(file);
+});
+
+/* DOWNLOAD */
+form.addEventListener("submit",(e)=>{
+    e.preventDefault();
+    drawID();
+    downloadLink.href = canvas.toDataURL("image/png");
+    downloadLink.download = nameInput.value.replace(/ /g,"_")+"_ID.png";
+    downloadLink.style.display="block";
 });
 </script>
+
 </body>
 </html>
-
