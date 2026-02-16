@@ -7,68 +7,237 @@
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',sans-serif;background:#eef2f7;text-align:center;padding:20px;}
-.container{max-width:400px;margin:auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 0 15px rgba(0,0,0,0.2);}
-input, select{width:100%;padding:10px;margin:8px 0;border-radius:5px;border:1px solid #ccc;font-size:14px;}
-button{padding:10px 20px;background:#333;color:white;border:none;border-radius:5px;cursor:pointer;margin-top:10px;}
-button:hover{background:#555;}
-#customSize{display:none;gap:8px;flex-wrap:wrap;display:flex;}
-#customSize input{flex:1 1 45%;min-width:120px;padding:8px;font-size:14px;}
+
+body{
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#1f2937,#111827);
+}
+
+.container{
+    max-width:750px;
+    margin:20px auto;
+    background:#fff;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.3);
+}
+
+h2{text-align:center;margin-bottom:20px;color:#1f2937}
+
+form{display:flex;flex-direction:column;gap:12px}
+
+label{font-weight:600;font-size:14px}
+
+input,select{
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    font-size:15px;
+}
+
+#customSize{
+    display:none;
+    gap:10px;
+    flex-wrap:wrap;
+    display:flex;
+}
+
+#customSize input{
+    flex:1 1 45%;
+    min-width:120px;
+    padding:8px;
+    font-size:14px;
+}
+
 @media(max-width:500px){
     #customSize{flex-direction:column;}
     #customSize input{width:100%;}
 }
-canvas{margin-top:20px;border:2px solid darkgray;width:100%;height:auto;}
+
+button{
+    padding:14px;
+    font-size:16px;
+    font-weight:bold;
+    border:none;
+    border-radius:12px;
+    background:#1f2937;
+    color:white;
+    cursor:pointer;
+}
+
+canvas{
+    display:none;
+    width:100%;
+    height:auto;
+    margin-top:25px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
+
+#downloadLink{
+    display:none;
+    margin-top:15px;
+    text-align:center;
+    padding:12px;
+    background:#1f2937;
+    color:white;
+    text-decoration:none;
+    border-radius:12px;
+    font-weight:bold;
+}
 </style>
 </head>
+
 <body>
 
 <div class="container">
-<h2>Frontier Regional Hospital</h2>
+<h2>Frontier Regional Hospital – ID Generator</h2>
 
-<input type="text" id="name" placeholder="Full Name" required>
-<input type="text" id="position" placeholder="Position" required>
-<input type="text" id="department" placeholder="Department" required>
+<form id="idForm">
+
+<label>Full Name</label>
+<input type="text" id="name" required>
+
+<label>Position</label>
+<input type="text" id="position" required>
+
+<label>Department</label>
+<input type="text" id="department" required>
+
+<label>Profile Photo</label>
 <input type="file" id="photo" accept="image/*" required>
 
-<select id="sizeOption" onchange="toggleCustomSize()">
-    <option value="medium" selected>Medium (Default)</option>
-    <option value="small">Small</option>
-    <option value="large">Large</option>
-    <option value="custom">Custom (cm)</option>
+<label>Photo Size</label>
+<select id="photoSize">
+<option value="small">Small (200x250)</option>
+<option value="medium" selected>Medium (250x300)</option>
+<option value="large">Large (300x360)</option>
+<option value="custom">Custom (cm)</option>
 </select>
 
 <div id="customSize">
-    <input type="number" id="customWidth" placeholder="Width (cm)">
-    <input type="number" id="customHeight" placeholder="Height (cm)">
+<input type="number" id="customW" placeholder="Width (cm)">
+<input type="number" id="customH" placeholder="Height (cm)">
 </div>
 
-<button onclick="generateID()">Generate ID Card</button>
+<button type="submit">Generate ID Card</button>
 
-<canvas id="canvas" width="350" height="500"></canvas>
-<br>
-<button id="downloadBtn" style="display:none;" onclick="downloadID()">Download ID Card</button>
+</form>
 
+<canvas id="idCanvas"></canvas>
+<a id="downloadLink">Download ID Card</a>
 </div>
 
 <script>
-const canvas=document.getElementById("canvas");
+const canvas=document.getElementById("idCanvas");
 const ctx=canvas.getContext("2d");
+canvas.width=1000;
+canvas.height=600;
 
 const nameInput=document.getElementById("name");
 const positionInput=document.getElementById("position");
 const departmentInput=document.getElementById("department");
 const photoInput=document.getElementById("photo");
-const sizeOption=document.getElementById("sizeOption");
+const photoSizeSelect=document.getElementById("photoSize");
 const customDiv=document.getElementById("customSize");
-const downloadBtn=document.getElementById("downloadBtn");
+const form=document.getElementById("idForm");
+const downloadLink=document.getElementById("downloadLink");
 
 let uploadedPhoto=null;
 
-function toggleCustomSize(){
-    customDiv.style.display = sizeOption.value==="custom" ? "flex" : "none";
+// Show custom size inputs when selected
+photoSizeSelect.addEventListener("change",()=>{
+    customDiv.style.display = photoSizeSelect.value==="custom" ? "flex" : "none";
+});
+
+// Convert photo size selection
+function getPhotoSize(){
+    if(photoSizeSelect.value==="small") return [200,250];
+    if(photoSizeSelect.value==="medium") return [250,300];
+    if(photoSizeSelect.value==="large") return [300,360];
+    if(photoSizeSelect.value==="custom"){
+        const w=parseFloat(document.getElementById("customW").value);
+        const h=parseFloat(document.getElementById("customH").value);
+        if(!w || !h) return [250,300]; // default if empty
+        return [w*37.8, h*37.8]; // cm to px
+    }
+    return [250,300];
 }
 
+// Auto shrink name if too long
+function fitText(text,maxWidth,startSize){
+    let size=startSize;
+    do{
+        ctx.font="bold "+size+"px Segoe UI";
+        size--;
+    }while(ctx.measureText(text).width>maxWidth && size>20);
+    return size;
+}
+
+// Draw ID card
+function drawID(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    const background=new Image();
+    background.src="background.jpeg";
+
+    const logo=new Image();
+    logo.src="download.jpeg";
+
+    background.onload=()=>{
+        ctx.drawImage(background,0,0,canvas.width,canvas.height);
+
+        // Dark gray header
+        ctx.fillStyle="#333333";
+        ctx.fillRect(0,0,canvas.width,120);
+
+        ctx.fillStyle="#ffffff";
+        ctx.font="bold 40px Segoe UI";
+        ctx.textAlign="center";
+        ctx.fillText("FRONTIER REGIONAL HOSPITAL",canvas.width/2,75);
+
+        logo.onload=()=>{
+            ctx.drawImage(logo,30,20,120,80);
+
+            const [photoW,photoH]=getPhotoSize();
+            const photoX=70;
+            const photoY=170;
+
+            // Dark gray border around profile photo
+            ctx.fillStyle="#444444";
+            ctx.fillRect(photoX-6,photoY-6,photoW+12,photoH+12);
+
+            if(uploadedPhoto)
+                ctx.drawImage(uploadedPhoto,photoX,photoY,photoW,photoH);
+
+            const textX=400;
+            const maxWidth=500;
+
+            const name=nameInput.value.toUpperCase();
+            let nameSize=fitText(name,maxWidth,50);
+
+            ctx.textAlign="left";
+            ctx.fillStyle="#ffffff";
+            ctx.font="bold "+nameSize+"px Segoe UI";
+            ctx.fillText(name,textX,260);
+
+            ctx.font="32px Segoe UI";
+            ctx.fillText(positionInput.value.toUpperCase(),textX,330);
+
+            ctx.font="26px Segoe UI";
+            ctx.fillText(departmentInput.value.toUpperCase(),textX,380);
+
+            canvas.style.display="block";
+            downloadLink.style.display="inline-block";
+
+            downloadLink.href=canvas.toDataURL("image/png");
+            downloadLink.download=name.replace(/ /g,"_")+"_ID.png";
+        }
+    }
+}
+
+// Handle photo upload
 photoInput.addEventListener("change",e=>{
     const file=e.target.files[0];
     if(!file) return;
@@ -77,70 +246,12 @@ photoInput.addEventListener("change",e=>{
     img.src=URL.createObjectURL(file);
 });
 
-function generateID(){
-    if(!uploadedPhoto){alert("Upload photo first."); return;}
-
-    const name=nameInput.value.toUpperCase();
-    const position=positionInput.value.toUpperCase();
-    const department=departmentInput.value.toUpperCase();
-
-    let photoWidth=120;
-    let photoHeight=150;
-
-    if(sizeOption.value==="small"){photoWidth=90;photoHeight=120;}
-    if(sizeOption.value==="large"){photoWidth=150;photoHeight=200;}
-    if(sizeOption.value==="custom"){
-        let w=parseFloat(document.getElementById("customWidth").value);
-        let h=parseFloat(document.getElementById("customHeight").value);
-        if(!w||!h){alert("Enter width and height in cm."); return;}
-        photoWidth=w*37.8;
-        photoHeight=h*37.8;
-    }
-
-    const background=new Image();
-    background.src="background.jpeg";
-    const logo=new Image();
-    logo.src="download.jpeg";
-
-    background.onload=()=>{
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.drawImage(background,0,0,canvas.width,canvas.height);
-
-        ctx.fillStyle="#333";
-        ctx.fillRect(0,0,canvas.width,90);
-
-        logo.onload=()=>{
-            ctx.drawImage(logo,20,15,60,60);
-            ctx.fillStyle="white";
-            ctx.font="bold 18px Arial";
-            ctx.fillText("FRONTIER REGIONAL HOSPITAL",95,50);
-
-            // Photo border
-            const photoX=115; const photoY=110;
-            ctx.strokeStyle="darkgray";
-            ctx.lineWidth=3;
-            ctx.strokeRect(photoX,photoY,photoWidth,photoHeight);
-            ctx.drawImage(uploadedPhoto,photoX,photoY,photoWidth,photoHeight);
-
-            ctx.fillStyle="black";
-            ctx.font="bold 18px Arial";
-            ctx.fillText(name,50,300);
-            ctx.font="16px Arial";
-            ctx.fillText(position,50,330);
-            ctx.fillText(department,50,360);
-
-            canvas.style.display="block";
-            downloadBtn.style.display="inline-block";
-        }
-    }
-}
-
-function downloadID(){
-    const link=document.createElement("a");
-    link.download="FRH_ID_Card.png";
-    link.href=canvas.toDataURL();
-    link.click();
-}
+// Generate ID on form submit
+form.addEventListener("submit",e=>{
+    e.preventDefault();
+    if(!uploadedPhoto){ alert("Upload photo first."); return;}
+    drawID();
+});
 </script>
 
 </body>
