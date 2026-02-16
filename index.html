@@ -1,80 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Frontier Regional Hospital ID System</title>
+<title>Frontier Regional Hospital - ID Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-    font-family:Arial, sans-serif;
-    background:#f4f4f4;
-    text-align:center;
-    padding:20px;
-}
-
-.container{
-    max-width:400px;
-    margin:auto;
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
-
-input, select{
-    width:100%;
-    padding:10px;
-    margin:8px 0;
-    border-radius:5px;
-    border:1px solid #ccc;
-}
-
-button{
-    padding:10px 20px;
-    background:#333;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-    margin-top:10px;
-}
-
-button:hover{
-    background:#555;
-}
-
-#customSize{
-    display:none;
-    gap:8px;
-    flex-wrap:wrap;
-}
-
-#customSize input{
-    flex:1 1 45%;
-    min-width:120px;
-    padding:8px;
-    font-size:14px;
-}
-
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#eef2f7;text-align:center;padding:20px;}
+.container{max-width:400px;margin:auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 0 15px rgba(0,0,0,0.2);}
+input, select{width:100%;padding:10px;margin:8px 0;border-radius:5px;border:1px solid #ccc;font-size:14px;}
+button{padding:10px 20px;background:#333;color:white;border:none;border-radius:5px;cursor:pointer;margin-top:10px;}
+button:hover{background:#555;}
+#customSize{display:none;gap:8px;flex-wrap:wrap;display:flex;}
+#customSize input{flex:1 1 45%;min-width:120px;padding:8px;font-size:14px;}
 @media(max-width:500px){
-    #customSize{
-        flex-direction:column;
-    }
-    #customSize input{
-        width:100%;
-    }
+    #customSize{flex-direction:column;}
+    #customSize input{width:100%;}
 }
-
-canvas{
-    margin-top:20px;
-    border:2px solid darkgray;
-}
+canvas{margin-top:20px;border:2px solid darkgray;width:100%;height:auto;}
 </style>
 </head>
 <body>
 
 <div class="container">
-
 <h2>Frontier Regional Hospital</h2>
 
 <input type="text" id="name" placeholder="Full Name" required>
@@ -86,7 +35,7 @@ canvas{
     <option value="medium" selected>Medium (Default)</option>
     <option value="small">Small</option>
     <option value="large">Large</option>
-    <option value="custom">Custom (CM)</option>
+    <option value="custom">Custom (cm)</option>
 </select>
 
 <div id="customSize">
@@ -97,130 +46,101 @@ canvas{
 <button onclick="generateID()">Generate ID Card</button>
 
 <canvas id="canvas" width="350" height="500"></canvas>
-
 <br>
 <button id="downloadBtn" style="display:none;" onclick="downloadID()">Download ID Card</button>
 
 </div>
 
 <script>
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+const nameInput=document.getElementById("name");
+const positionInput=document.getElementById("position");
+const departmentInput=document.getElementById("department");
+const photoInput=document.getElementById("photo");
+const sizeOption=document.getElementById("sizeOption");
+const customDiv=document.getElementById("customSize");
+const downloadBtn=document.getElementById("downloadBtn");
+
+let uploadedPhoto=null;
 
 function toggleCustomSize(){
-    let option = document.getElementById("sizeOption").value;
-    let custom = document.getElementById("customSize");
-
-    if(option === "custom"){
-        custom.style.display = "flex";
-    }else{
-        custom.style.display = "none";
-    }
+    customDiv.style.display = sizeOption.value==="custom" ? "flex" : "none";
 }
 
+photoInput.addEventListener("change",e=>{
+    const file=e.target.files[0];
+    if(!file) return;
+    const img=new Image();
+    img.onload=()=>{uploadedPhoto=img;}
+    img.src=URL.createObjectURL(file);
+});
+
 function generateID(){
+    if(!uploadedPhoto){alert("Upload photo first."); return;}
 
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
+    const name=nameInput.value.toUpperCase();
+    const position=positionInput.value.toUpperCase();
+    const department=departmentInput.value.toUpperCase();
 
-    const name = document.getElementById("name").value.toUpperCase();
-    const position = document.getElementById("position").value.toUpperCase();
-    const department = document.getElementById("department").value.toUpperCase();
-    const photoInput = document.getElementById("photo").files[0];
-    const sizeOption = document.getElementById("sizeOption").value;
+    let photoWidth=120;
+    let photoHeight=150;
 
-    if(!photoInput){
-        alert("Please upload a photo.");
-        return;
+    if(sizeOption.value==="small"){photoWidth=90;photoHeight=120;}
+    if(sizeOption.value==="large"){photoWidth=150;photoHeight=200;}
+    if(sizeOption.value==="custom"){
+        let w=parseFloat(document.getElementById("customWidth").value);
+        let h=parseFloat(document.getElementById("customHeight").value);
+        if(!w||!h){alert("Enter width and height in cm."); return;}
+        photoWidth=w*37.8;
+        photoHeight=h*37.8;
     }
 
-    let photoWidth = 120;
-    let photoHeight = 150;
+    const background=new Image();
+    background.src="background.jpeg";
+    const logo=new Image();
+    logo.src="download.jpeg";
 
-    if(sizeOption === "small"){
-        photoWidth = 90;
-        photoHeight = 120;
-    }
-    else if(sizeOption === "large"){
-        photoWidth = 150;
-        photoHeight = 200;
-    }
-    else if(sizeOption === "custom"){
-
-        let widthCM = parseFloat(document.getElementById("customWidth").value);
-        let heightCM = parseFloat(document.getElementById("customHeight").value);
-
-        if(!widthCM || !heightCM){
-            alert("Enter width and height in cm.");
-            return;
-        }
-
-        // Convert CM to pixels (1cm ≈ 37.8px)
-        photoWidth = widthCM * 37.8;
-        photoHeight = heightCM * 37.8;
-    }
-
-    const background = new Image();
-    background.src = "background.jpg";
-
-    background.onload = function(){
-
+    background.onload=()=>{
         ctx.clearRect(0,0,canvas.width,canvas.height);
-
         ctx.drawImage(background,0,0,canvas.width,canvas.height);
 
-        // Dark gray header
-        ctx.fillStyle = "#333";
+        ctx.fillStyle="#333";
         ctx.fillRect(0,0,canvas.width,90);
 
-        // Logo
-        const logo = new Image();
-        logo.src = "download.png";
-
-        logo.onload = function(){
+        logo.onload=()=>{
             ctx.drawImage(logo,20,15,60,60);
-
-            ctx.fillStyle = "white";
-            ctx.font = "bold 18px Arial";
+            ctx.fillStyle="white";
+            ctx.font="bold 18px Arial";
             ctx.fillText("FRONTIER REGIONAL HOSPITAL",95,50);
 
-            const reader = new FileReader();
-            reader.onload = function(e){
-                const photo = new Image();
-                photo.src = e.target.result;
+            // Photo border
+            const photoX=115; const photoY=110;
+            ctx.strokeStyle="darkgray";
+            ctx.lineWidth=3;
+            ctx.strokeRect(photoX,photoY,photoWidth,photoHeight);
+            ctx.drawImage(uploadedPhoto,photoX,photoY,photoWidth,photoHeight);
 
-                photo.onload = function(){
+            ctx.fillStyle="black";
+            ctx.font="bold 18px Arial";
+            ctx.fillText(name,50,300);
+            ctx.font="16px Arial";
+            ctx.fillText(position,50,330);
+            ctx.fillText(department,50,360);
 
-                    // Photo border
-                    ctx.strokeStyle = "darkgray";
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(115,110,photoWidth,photoHeight);
-
-                    ctx.drawImage(photo,115,110,photoWidth,photoHeight);
-
-                    ctx.fillStyle = "black";
-                    ctx.font = "bold 18px Arial";
-                    ctx.fillText(name,50,300);
-
-                    ctx.font = "16px Arial";
-                    ctx.fillText(position,50,330);
-                    ctx.fillText(department,50,360);
-
-                    document.getElementById("downloadBtn").style.display = "inline-block";
-                }
-            }
-
-            reader.readAsDataURL(photoInput);
+            canvas.style.display="block";
+            downloadBtn.style.display="inline-block";
         }
     }
 }
 
 function downloadID(){
-    const canvas = document.getElementById("canvas");
-    const link = document.createElement("a");
-    link.download = "FRH_ID_Card.png";
-    link.href = canvas.toDataURL();
+    const link=document.createElement("a");
+    link.download="FRH_ID_Card.png";
+    link.href=canvas.toDataURL();
     link.click();
 }
-
 </script>
 
 </body>
